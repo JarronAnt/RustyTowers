@@ -47,4 +47,14 @@ fn spawn_basic_scene(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, m
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
+
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            intensity: 1500.0,
+            shadows_enabled: true,
+            ..Default::default()
+        },
+        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        ..Default::default()
+    });
 }
