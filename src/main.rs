@@ -5,6 +5,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 pub const HEIGHT: f32 = 720.0;
 pub const WIDTH: f32 = 1280.0;
 
+//Pi constant
 use std::f32::consts::PI;
 
 //assets
@@ -67,7 +68,7 @@ fn spawn_basic_scene(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, m
     })
     .insert(Name::new("Plane"));
 
-    //create a cube
+    //create a cube as the tower and add bullet
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
         material: materials.add(Color::rgb(0.67, 0.94, 0.42).into()),
@@ -79,6 +80,7 @@ fn spawn_basic_scene(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, m
         shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
     });
 
+    //create a point light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 1500.0,
@@ -97,10 +99,12 @@ fn tower_shooting(mut commands: Commands,
      time: Res<Time>,
 ){
     for mut tower in towers.iter_mut(){
+        //update the timer
         tower.shooting_timer.tick(time.delta());
         if tower.shooting_timer.just_finished() {
             let spawn_transform = Transform::from_xyz(0.0, 0.7, 0.6).with_rotation(Quat::from_rotation_y(-PI / 2.0));
-
+            
+            //spawn the bullet scene and use lifetime to desapwn it
             commands.spawn(SceneBundle{
                 scene: bullet_assets.bullet_scene.clone(),
                 transform: spawn_transform,
@@ -119,6 +123,7 @@ fn bullet_despawn(
     mut bullets: Query<(Entity, &mut Lifetime)>,
     time: Res<Time>,
 ) {
+    //despawn all bullets that have reached their lifetime
     for (entity, mut lifetime) in &mut bullets {
         lifetime.timer.tick(time.delta());
         if lifetime.timer.just_finished() {
@@ -127,6 +132,7 @@ fn bullet_despawn(
     }
 }
 
+//load all assets
 fn asset_loading(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(GameAssets {
         bullet_scene: asset_server.load("Bullet.glb#Scene0"),
